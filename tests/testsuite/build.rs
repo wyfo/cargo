@@ -6381,3 +6381,38 @@ fn renamed_uplifted_artifact_remains_unmodified_after_rebuild() {
     let not_the_same = !same_file::is_same_file(bin, renamed_bin).unwrap();
     assert!(not_the_same, "renamed uplifted artifact must be unmodified");
 }
+
+#[cargo_test]
+fn dependencies_only() {
+    let foo = project()
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "foo"
+                version = "0.0.1"
+                authors = []
+
+                [dependencies.bar]
+                path = "../bar"
+            "#,
+        )
+        .file(
+            "src/main.rs",
+            "// no fn main, but don't care because --dependencies-only",
+        )
+        .build();
+    let _bar = project()
+        .at("bar")
+        .file("Cargo.toml", &basic_manifest("bar", "0.1.0"))
+        .file("src/lib.rs", "pub fn baz() {}")
+        .build();
+
+    foo.cargo("build --dependencies-only -Zunstable-options")
+        .masquerade_as_nightly_cargo(&["dependencies-only"])
+        .with_stderr(
+            "[..] Compiling bar v0.1.0 ([..])\n\
+             [..] Finished dev [unoptimized + debuginfo] target(s) in [..]\n",
+        )
+        .run();
+}

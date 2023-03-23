@@ -252,6 +252,10 @@ pub trait CommandExt: Sized {
             .require_equals(true),
         )
     }
+
+    fn arg_dependencies_only(self) -> Self {
+        self._arg(flag("dependencies-only", "Build only dependencies (unstable)"))
+    }
 }
 
 impl CommandExt for Command {
@@ -538,6 +542,7 @@ pub trait ArgMatchesExt {
         build_config.build_plan = self.flag("build-plan");
         build_config.unit_graph = self.flag("unit-graph");
         build_config.future_incompat_report = self.flag("future-incompat-report");
+        build_config.dependencies_only = self.flag("dependencies-only");
 
         if self._contains("timings") {
             for timing_output in self._values_of("timings") {
@@ -580,6 +585,11 @@ pub trait ArgMatchesExt {
             config
                 .cli_unstable()
                 .fail_if_stable_opt("--unit-graph", 8002)?;
+        }
+        if build_config.dependencies_only {
+            config
+                .cli_unstable()
+                .fail_if_stable_opt("--dependenciess-only", 2644)?;
         }
 
         let opts = CompileOptions {

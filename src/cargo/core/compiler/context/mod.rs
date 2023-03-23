@@ -155,8 +155,12 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
         }
 
         for unit in &self.bcx.roots {
-            let force_rebuild = self.bcx.build_config.force_rebuild;
-            super::compile(&mut self, &mut queue, &mut plan, unit, exec, force_rebuild)?;
+            if self.bcx.build_config.dependencies_only {
+                super::compile_dependencies(&mut self, &mut queue, &mut plan, unit, exec)?;
+            } else {
+                let force_rebuild = self.bcx.build_config.force_rebuild;
+                super::compile(&mut self, &mut queue, &mut plan, unit, exec, force_rebuild)?;
+            }
         }
 
         // Now that we've got the full job queue and we've done all our

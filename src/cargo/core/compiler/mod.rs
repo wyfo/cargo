@@ -250,15 +250,27 @@ fn compile<'cfg>(
     jobs.enqueue(cx, unit, job)?;
     drop(p);
 
+    compile_dependencies(cx, jobs, plan, unit, exec)?;
+    if build_plan {
+        plan.add(cx, unit)?;
+    }
+
+    Ok(())
+}
+
+/// Call [`compile`] for each unit dependencies
+fn compile_dependencies<'cfg>(
+    cx: &mut Context<'_, 'cfg>,
+    jobs: &mut JobQueue<'cfg>,
+    plan: &mut BuildPlan,
+    unit: &Unit,
+    exec: &Arc<dyn Executor>,
+) -> CargoResult<()> {
     // Be sure to compile all dependencies of this target as well.
     let deps = Vec::from(cx.unit_deps(unit)); // Create vec due to mutable borrow.
     for dep in deps {
         compile(cx, jobs, plan, &dep.unit, exec, false)?;
     }
-    if build_plan {
-        plan.add(cx, unit)?;
-    }
-
     Ok(())
 }
 

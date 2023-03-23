@@ -83,6 +83,7 @@ Each new feature described below should explain how to use it.
     * [check-cfg](#check-cfg) --- Compile-time validation of `cfg` expressions.
     * [host-config](#host-config) --- Allows setting `[target]`-like configuration settings for host build targets.
     * [target-applies-to-host](#target-applies-to-host) --- Alters whether certain flags will be passed to host build targets.
+    * [dependencies-only](#dependencies-only) --- Build only dependencies.
 * rustdoc
     * [`doctest-in-workspace`](#doctest-in-workspace) --- Fixes workspace-relative paths when running doctests.
     * [rustdoc-map](#rustdoc-map) --- Provides mappings for documentation to link to external sites like [docs.rs](https://docs.rs/).
@@ -1285,6 +1286,17 @@ Valid operations are the following:
 * `shallow-index` *(planned)* - perform a shallow clone of the index.
 * `shallow-deps` *(planned)* - perform a shallow clone of git dependencies.
 * `checkout` *(planned)* - checkout the worktree, with support for filters and submodules.
+
+
+### dependencies-only
+* Tracking Issue: [#2644](https://github.com/rust-lang/cargo/issues/2644)
+
+The `--dependencies-only` flag can be passed to `cargo build` command to only
+build crate dependencies.
+
+```
+cargo +nightly build --dependencies-only -Z unstable-options
+```
 
 ## Stabilized and removed features
 
