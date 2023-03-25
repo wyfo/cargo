@@ -6416,3 +6416,39 @@ fn dependencies_only() {
         )
         .run();
 }
+
+#[cargo_test]
+fn dependencies_only_without_target_file() {
+    // If target file is not present, source must be explicit in the manifest.
+    let foo = project()
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "foo"
+                version = "0.0.1"
+                authors = []
+
+                [dependencies.bar]
+                path = "../bar"
+
+                [[bin]]
+                name = "foo"
+                path = "src/main.rs"
+            "#,
+        )
+        .build();
+    let _bar = project()
+        .at("bar")
+        .file("Cargo.toml", &basic_manifest("bar", "0.1.0"))
+        .file("src/lib.rs", "pub fn baz() {}")
+        .build();
+
+    foo.cargo("build --dependencies-only -Zunstable-options")
+        .masquerade_as_nightly_cargo(&["dependencies-only"])
+        .with_stderr(
+            "[..] Compiling bar v0.1.0 ([..])\n\
+             [..] Finished dev [unoptimized + debuginfo] target(s) in [..]\n",
+        )
+        .run();
+}
